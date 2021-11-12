@@ -22,6 +22,7 @@ pub fn simplify_expression( expr: &mut PolynomialExpression ) {
             }
             // if they're both variables then attempt to couple them together if possible
             (Operand::VARIABLE(lhs), Operand::VARIABLE(rhs)) => {
+                // if they have the same exponent we can add their multipliers together
                 if lhs.exp == rhs.exp {
                     expr[i] = Operand::VARIABLE( Variable::new(
                         lhs.mult + rhs.mult, 
@@ -29,6 +30,7 @@ pub fn simplify_expression( expr: &mut PolynomialExpression ) {
                     ));
                     expr.remove(i+1);
                 }
+                //... otherwise they have to be left as seperate operands and we move onto next pair
                 else {
                     i += 1;
                 }
@@ -49,6 +51,24 @@ pub fn simplify_expression( expr: &mut PolynomialExpression ) {
     }
 }
 
+pub fn multiply_expression_by_operand( op: &Operand, expr: &PolynomialExpression, simplify_output: bool ) -> PolynomialExpression {
+    let mut product = PolynomialExpression::with_capacity( expr.len() );
+
+    if expr.len() == 0 {
+        product.push( *op );
+    }
+
+    for i in 0..expr.len() {
+        product.push( (*op) * expr[i] );
+    }
+
+    if simplify_output {
+        simplify_expression( &mut product );
+    }
+
+    product
+}
+
 pub fn multiply_expressions( expr1: &PolynomialExpression, expr2: &PolynomialExpression ) -> PolynomialExpression {
     let mut product = PolynomialExpression::new();
 
@@ -66,22 +86,7 @@ pub fn multiply_expressions( expr1: &PolynomialExpression, expr2: &PolynomialExp
     }
 
     for i in 0..expr1.len() {
-        for j in 0..expr2.len() {
-            match (&expr1[i], &expr2[j]) {
-                (Operand::CONSTANT(lhs), Operand::CONSTANT(rhs)) => {
-                    product.push( Operand::CONSTANT( lhs * rhs ));
-                }
-                (Operand::CONSTANT(lhs), Operand::VARIABLE(rhs)) => {
-                    product.push( Operand::VARIABLE( lhs.to_owned() * rhs.to_owned() ));
-                }
-                (Operand::VARIABLE(lhs), Operand::CONSTANT(rhs)) => {
-                    product.push( Operand::VARIABLE( lhs.to_owned() * rhs.to_owned() ));
-                }
-                (Operand::VARIABLE(lhs), Operand::VARIABLE(rhs)) => {
-                    product.push( Operand::VARIABLE( lhs.to_owned() * rhs.to_owned() ));
-                }
-            }
-        }
+        product.extend_from_slice( &multiply_expression_by_operand( &expr1[i], expr2, false ) );
     }
 
     simplify_expression(&mut product);
@@ -99,10 +104,10 @@ pub fn expression_to_string( expr: &PolynomialExpression ) -> String {
 
     fn num_to_sgn( n: f32 ) -> char {
         if n > 0.0 {
-            return '+';
+            '+'
         }
         else {
-            return '-'
+            '-'
         }
     }
 

@@ -1,4 +1,4 @@
-use crate::{expression::{PolynomialExpression, multiply_expressions, simplify_expression}, operand::Operand, variable::Variable};
+use crate::{expression::{PolynomialExpression, multiply_expression_by_operand, multiply_expressions, simplify_expression}, operand::Operand, variable::Variable};
 
 /// Returns a polynomial expression that describes a function that may yield given points, done with Lagrange's interpolation polynomial
 /// 
@@ -25,7 +25,7 @@ pub fn interpolate_lagrange( x: &[f32], y: &[f32] ) -> PolynomialExpression {
             }
         }
 
-        let mut nominator = multiply_expressions( &vec![ Operand::CONSTANT( y[i] / denominator ) ], &nominator ) ;
+        let mut nominator = multiply_expression_by_operand( &Operand::CONSTANT( y[i] / denominator ), &nominator, true ) ;
 
         w.append( &mut nominator );
     }

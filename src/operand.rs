@@ -1,6 +1,6 @@
 use crate::variable::Variable;
 
-use std::cmp::Ordering;
+use std::{ cmp::Ordering, ops::Mul };
 
 #[derive(Clone, Copy)]
 pub enum Operand {
@@ -25,6 +25,27 @@ impl PartialOrd for Operand {
             (Operand::CONSTANT(_), Operand::VARIABLE(_)) => Some(Ordering::Greater),
             (Operand::VARIABLE(_), Operand::CONSTANT(_)) => Some(Ordering::Less),
             (Operand::VARIABLE(lhs), Operand::VARIABLE(rhs)) => lhs.partial_cmp(rhs),
+        }
+    }
+}
+
+impl Mul for Operand {
+    type Output = Self;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        match (self, rhs) {
+            (Operand::CONSTANT(c1), Operand::CONSTANT(c2)) => {
+                return Operand::CONSTANT( c1 * c2 );
+            }
+            (Operand::CONSTANT(c), Operand::VARIABLE(v)) => {
+                return Operand::VARIABLE( c * v );
+            }
+            (Operand::VARIABLE(v), Operand::CONSTANT(c)) => {
+                return Operand::VARIABLE( v * c );
+            }
+            (Operand::VARIABLE(v1), Operand::VARIABLE(v2)) => {
+                return Operand::VARIABLE( v1 * v2 );
+            }
         }
     }
 }
