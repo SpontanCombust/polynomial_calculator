@@ -44,10 +44,19 @@ impl ToString for Variable {
     fn to_string(&self) -> String {
         let mut s = String::new();
 
-        s.push_str(&self.mult.to_string());
+        if self.mult == -1.0 {
+            s.push('-');
+        }
+        else if self.mult != 1.0 {
+            s.push_str(&self.mult.to_string());
+        }
+
         s.push(VARIABLE_NAME);
-        s.push('^');
-        s.push_str(&self.exp.to_string());
+        
+        if self.exp != 1 {
+            s.push('^');
+            s.push_str(&self.exp.to_string());
+        }
 
         s
     }
